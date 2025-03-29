@@ -43,6 +43,7 @@
     }
 </script>
 
+
 <div class="profile-container">
     <div class="profile-header">
         <h2>Profile & Settings</h2>
@@ -203,6 +204,7 @@
 </div>
 
 <style lang="scss">
+  @use 'sass:color';
   /* Custom Color Palette */
   $primary-dark: #151E3F;    // Dark blue - primary background
   $primary-accent: #1D7874;  // Teal - highlights and buttons
@@ -361,7 +363,7 @@
       transition: background-color 0.2s;
 
       &:hover {
-        background-color: darken($primary-accent, 5%);
+        background-color: color.adjust($primary-accent, $lightness: -5%);
       }
     }
   }

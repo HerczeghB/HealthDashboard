@@ -1,5 +1,10 @@
 <script>
+    import HealthCard from "$lib/components/HealthCard.svelte";
+    import ActivityHistory from "$lib/components/ActivityHistory.svelte";
+    import NutritionTracker from "$lib/components/NutritionTracker.svelte";
+
     const today = new Date().toDateString();
+
 </script>
 
 <div class="welcome-bar">
@@ -9,51 +14,25 @@
 
 <div class="dashboard-grid">
     <!-- Health summary cards -->
-    <div class="dashboard-card">
-        <div class="card-icon">⚖️</div>
-        <div class="card-content">
-            <h3>Weight Tracking</h3>
-            <p>70.5 kg</p>
-        </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-icon">👣</div>
-        <div class="card-content">
-            <h3>Step Count</h3>
-            <p>8,745 steps</p>
-        </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-icon">😴</div>
-        <div class="card-content">
-            <h3>Sleep Quality</h3>
-            <p>7.5 hours</p>
-        </div>
-    </div>
-    <div class="dashboard-card">
-        <div class="card-icon">💧</div>
-        <div class="card-content">
-            <h3>Water Intake</h3>
-            <p>1.5 liters</p>
-        </div>
+    <HealthCard title="Weight Tracking" value="70.5" unit="kg" icon="⚖️" />
+    <HealthCard title="Step Count" value="8,745" unit="steps" icon="👣" />
+    <HealthCard title="Sleep Quality" value="7.5" unit="hours" icon="😴" />
+    <HealthCard title="Water Intake" value="1.5" unit="liters" icon="💧" />
+
+    <!-- Activity History -->
+    <div class="dashboard-card wide">
+        <ActivityHistory />
     </div>
 
-    <!-- Charts and detailed widgets -->
-    <div class="dashboard-card wide">
-        <h3>Activity History</h3>
-        <div class="placeholder-chart"></div>
-    </div>
+    <!-- Nutrition Summary -->
     <div class="dashboard-card tall">
-        <h3>Nutrition Summary</h3>
-        <div class="placeholder-chart tall"></div>
+        <NutritionTracker />
     </div>
-    <div class="dashboard-card">
-        <div class="card-icon">😊</div>
-        <div class="card-content">
-            <h3>Mood Tracker</h3>
-            <p>Good</p>
-        </div>
-    </div>
+
+    <!-- Mood Tracker -->
+    <HealthCard title="Mood Tracker" value="Good" icon="😊" />
+
+    <!-- Upcoming Events -->
     <div class="dashboard-card">
         <h3>Upcoming Events</h3>
         <ul class="event-list">
