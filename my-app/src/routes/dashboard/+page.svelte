@@ -2,6 +2,27 @@
     import HealthCard from "$lib/components/HealthCard.svelte";
     import ActivityHistory from "$lib/components/ActivityHistory.svelte";
     import NutritionTracker from "$lib/components/NutritionTracker.svelte";
+    import WaterCard from "$lib/components/WaterCard.svelte";
+    import EventsCard from "$lib/components/EventsCard.svelte";
+    import { onMount } from "svelte";
+
+    let dashboardPreferences = {
+        showWeight: true,
+        showSteps: true,
+        showSleep: true,
+        showWater: true,
+        showActivity: true,
+        showNutrition: true,
+        showMood: true,
+        showEvents: true,
+    }
+
+    onMount(async () => {
+        const res = await fetch("/api/dashboard-preference");
+        if (res.ok){
+            dashboardPreferences = await res.json();
+        }
+    })
 
     const today = new Date().toDateString();
 
@@ -13,33 +34,41 @@
 </div>
 
 <div class="dashboard-grid">
-    <!-- Health summary cards -->
-    <HealthCard title="Weight Tracking" value="70.5" unit="kg" icon="⚖️" />
-    <HealthCard title="Step Count" value="8,745" unit="steps" icon="👣" />
-    <HealthCard title="Sleep Quality" value="7.5" unit="hours" icon="😴" />
-    <HealthCard title="Water Intake" value="1.5" unit="liters" icon="💧" />
+    {#if dashboardPreferences.showWeight}
+        <HealthCard title="Weight Tracking" value="70.5" unit="kg" icon="⚖️" />
+    {/if}
 
-    <!-- Activity History -->
-    <div class="dashboard-card wide">
-        <ActivityHistory />
-    </div>
+    {#if dashboardPreferences.showSteps}
+        <HealthCard title="Step Count" value="8,745" unit="steps" icon="👣" />
+    {/if}
 
-    <!-- Nutrition Summary -->
-    <div class="dashboard-card tall">
-        <NutritionTracker />
-    </div>
+    {#if dashboardPreferences.showSleep}
+        <HealthCard title="Sleep Quality" value="7.5" unit="hours" icon="😴" />
+    {/if}
 
-    <!-- Mood Tracker -->
-    <HealthCard title="Mood Tracker" value="Good" icon="😊" />
+    {#if dashboardPreferences.showWater}
+        <WaterCard currentIntake={1.5}/>
+    {/if}
 
-    <!-- Upcoming Events -->
-    <div class="dashboard-card">
-        <h3>Upcoming Events</h3>
-        <ul class="event-list">
-            <li>Morning Run - 7:00 AM</li>
-            <li>Doctor's Appointment - 2:30 PM</li>
-        </ul>
-    </div>
+    {#if dashboardPreferences.showActivity}
+        <div class="dashboard-card wide">
+            <ActivityHistory />
+        </div>
+    {/if}
+
+    {#if dashboardPreferences.showNutrition}
+        <div class="dashboard-card tall">
+            <NutritionTracker />
+        </div>
+    {/if}
+
+    {#if dashboardPreferences.showMood}
+        <HealthCard title="Mood Tracker" value="Good" icon="😊" />
+    {/if}
+
+    {#if dashboardPreferences.showEvents}
+        <EventsCard />
+    {/if}
 </div>
 
 <style lang="scss">
@@ -96,21 +125,6 @@
       box-shadow: $shadow-md;
     }
 
-    h3 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-      color: $primary-dark;
-    }
-
-    p {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: $secondary-accent;
-    }
-
     &.wide {
       grid-column: span 2;
       display: block;
@@ -119,36 +133,6 @@
     &.tall {
       grid-row: span 2;
       display: block;
-    }
-
-    .card-icon {
-      font-size: 1.8rem;
-      margin-right: 1rem;
-    }
-
-    .card-content {
-      flex: 1;
-    }
-
-    .placeholder-chart {
-      height: 140px;
-      background: linear-gradient(135deg, rgba($primary-accent, 0.1) 0%, rgba($secondary-accent, 0.1) 100%);
-      border-radius: $border-radius;
-      margin-top: 1rem;
-
-      &.tall {
-        height: 280px;
-      }
-    }
-  }
-
-  .event-list {
-    padding-left: 1.2rem;
-    margin: 1rem 0 0;
-
-    li {
-      margin-bottom: 0.5rem;
-      color: $text-muted;
     }
   }
 

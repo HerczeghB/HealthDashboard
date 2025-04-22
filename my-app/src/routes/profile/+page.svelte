@@ -1,4 +1,6 @@
 <script>
+    import { onMount} from "svelte";
+
     // User profile data (placeholder)
     let userProfile = {
         name: 'John Doe',
@@ -11,16 +13,24 @@
         sleepGoal: 8
     };
 
-    // Dashboard preferences (placeholder)
     let dashboardPreferences = {
         showWeight: true,
         showSteps: true,
         showSleep: true,
         showWater: true,
+        showActivity: true,
         showNutrition: true,
         showMood: true,
         showEvents: true
     };
+
+    onMount(async () => {
+        const res = await fetch("/api/dashboard-preference");
+        if (res.ok) {
+            dashboardPreferences = await res.json();
+        }
+    })
+
 
     // Active section state
     let activeSection = 'personal';
@@ -37,9 +47,18 @@
     }
 
     // Update dashboard preferences function (placeholder)
-    function updatePreferences() {
-        // In a real app, this would send the updated preferences to the backend
-        alert('Dashboard preferences updated successfully');
+    async function updatePreferences() {
+        const res = await fetch("/api/dashboard-preference", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dashboardPreferences)
+        });
+
+        if (res.ok) {
+            alert('Preferences saved successfully');
+        }else{
+            alert('Failed to save preferences');
+        }
     }
 </script>
 
@@ -170,6 +189,13 @@
                         <label class="checkbox-label">
                             <input type="checkbox" bind:checked={dashboardPreferences.showWater} />
                             <span>Water Intake</span>
+                        </label>
+                    </div>
+
+                    <div class="preference-item">
+                        <label class="checkbox-label">
+                            <input type="checkbox" bind:checked={dashboardPreferences.showActivity} />
+                            <span>Activity History</span>
                         </label>
                     </div>
 

@@ -36,3 +36,4 @@ pnpm-debug.log*
 # MacOS & System files
 .DS_Store
 Thumbs.db
+/src/data/dashboard-preferences.json

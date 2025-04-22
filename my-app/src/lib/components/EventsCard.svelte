@@ -1,15 +1,14 @@
 <script>
-    export let title = "Health Metric";
-    export let value = "--";
-    export let unit = "";
-    export let icon = "💪"; // Default icon (can be replaced)
+    export let title = "Upcoming Events";
 </script>
 
-<div class="health-card">
-    <div class="icon">{icon}</div>
+<div class="events-card">
     <div class="info">
         <h3>{title}</h3>
-        <p>{value} {unit}</p>
+        <ul class="event-list">
+            <li>Morning Run - 7:00 AM</li>
+            <li>Doctor's Appointment - 2:30 PM</li>
+        </ul>
     </div>
 </div>
 
@@ -22,7 +21,7 @@
   $shadow-md: 0 8px 15px rgba(3, 0, 39, 0.1);
   $transition-speed: 0.2s;
 
-  .health-card {
+  .events-card {
     background-color: $card-bg-color;
     border-radius: $border-radius;
     box-shadow: $shadow-sm;
@@ -47,20 +46,17 @@
       color: $primary-dark;
     }
 
-    p {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: $secondary-accent;
-    }
-
-    .icon {
-      font-size: 1.8rem;
-      margin-right: 1rem;
-    }
-
     .info {
       flex: 1;
+    }
+
+    .event-list {
+      padding-left: 1.2rem;
+      margin: 1rem 0 0;
+
+      li {
+        margin-bottom: 0.5rem;
+      }
     }
   }
 </style>

@@ -1,16 +1,20 @@
 <script>
-    export let title = "Health Metric";
-    export let value = "--";
-    export let unit = "";
-    export let icon = "💪"; // Default icon (can be replaced)
+    export let icon = "💧";
+    export let currentIntake = 1;
+    const goal = 2;
+    $: progressPercent = Math.min((currentIntake / goal) * 100, 100);
 </script>
-
-<div class="health-card">
+<div class="water-card">
     <div class="icon">{icon}</div>
     <div class="info">
-        <h3>{title}</h3>
-        <p>{value} {unit}</p>
+        <h3>Water Intake</h3>
+        <p>{currentIntake} / {goal} liter</p>
+
+        <div class="progress-container">
+            <div class="progress-fill" style="height: {progressPercent}%;"></div>
+        </div>
     </div>
+
 </div>
 
 <style lang="scss">
@@ -22,7 +26,7 @@
   $shadow-md: 0 8px 15px rgba(3, 0, 39, 0.1);
   $transition-speed: 0.2s;
 
-  .health-card {
+  .water-card {
     background-color: $card-bg-color;
     border-radius: $border-radius;
     box-shadow: $shadow-sm;
@@ -61,6 +65,24 @@
 
     .info {
       flex: 1;
+    }
+
+    .progress-container {
+      margin-top: 0.75rem;
+      width: 20px;
+      height: 100px;
+      border-radius: 10px;
+      background-color: rgba($secondary-accent, 0.2);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .progress-fill {
+      width: 100%;
+      background-color: $secondary-accent;
+      transition: height 0.3s ease;
     }
   }
 </style>
