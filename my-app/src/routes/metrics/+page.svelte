@@ -1,51 +1,65 @@
 <script>
-    // Active metric tab state
+    import { onMount } from "svelte";
+    import NewData from "$lib/components/NewData.svelte";
+
     let activeMetric = 'weight';
+    let modeNewData = 0; //0 - hidden, 1 - number value, 2 - string value(mood)
 
-    // Placeholder data
-    const weightData = [
-        { date: '2023-03-01', value: 70.2 },
-        { date: '2023-03-05', value: 70.5 },
-        { date: '2023-03-10', value: 69.8 },
-        { date: '2023-03-15', value: 69.5 },
-        { date: '2023-03-20', value: 70.0 }
-    ];
+    let metrics = {
+        weight: [],
+        steps: [],
+        water: [],
+        sleep: [],
+        mood: []
+    };
 
-    const stepsData = [
-        { date: '2023-03-19', value: 8242 },
-        { date: '2023-03-20', value: 10321 },
-        { date: '2023-03-21', value: 7890 },
-        { date: '2023-03-22', value: 9102 },
-        { date: '2023-03-23', value: 8745 }
-    ];
+    onMount(async () => {
+        try {
+            const res = await fetch('/api/new-data');
+            if (res.ok) {
+                metrics = await res.json();
+            }
+        } catch (err) {
+            console.error('Failed to fetch metrics:', err);
+        }
+    });
 
-    const sleepData = [
-        { date: '2023-03-19', hours: 7.2, quality: 'Good' },
-        { date: '2023-03-20', hours: 6.8, quality: 'Fair' },
-        { date: '2023-03-21', hours: 8.1, quality: 'Excellent' },
-        { date: '2023-03-22', hours: 7.5, quality: 'Good' },
-        { date: '2023-03-23', hours: 7.0, quality: 'Good' }
-    ];
-
-    const waterData = [
-        { date: '2023-03-19', value: 1.8 },
-        { date: '2023-03-20', value: 2.2 },
-        { date: '2023-03-21', value: 1.6 },
-        { date: '2023-03-22', value: 2.0 },
-        { date: '2023-03-23', value: 1.5 }
-    ];
-
-    // Function to switch active metric
     function setActiveMetric(metric) {
         activeMetric = metric;
     }
 
-    // Function to get the latest metric value
     function getLatestValue(dataArray, valueProperty = 'value') {
         if (dataArray && dataArray.length > 0) {
             return dataArray[dataArray.length - 1][valueProperty];
         }
         return 'N/A';
+    }
+
+    async function handleNewData(event) {
+        const { metric, data } = event.detail;
+
+        // Check if data is correctly formatted
+        console.log("Data being sent:", { metric, data });
+
+        const res = await fetch('/api/new-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                metric,
+                data
+            })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+            console.log('Data submitted successfully:', result);
+        } else {
+            console.error('Error submitting data:', result);
+        }
+        modeNewData = 0;
     }
 </script>
 
@@ -80,6 +94,12 @@
         >
             💧 Water
         </button>
+        <button
+                class={activeMetric === 'mood' ? 'metric-tab active' : 'metric-tab'}
+                on:click={() => setActiveMetric('mood')}
+        >
+            😀😐😕 Mood
+        </button>
     </div>
 
     <div class="metrics-content">
@@ -88,11 +108,11 @@
             <div class="metric-detail-panel">
                 <div class="metric-summary">
                     <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(weightData)} kg</span>
+                        <span class="metric-value">{getLatestValue(metrics.weight)} kg</span>
                         <span class="metric-label">Current Weight</span>
                     </div>
                     <div class="metric-actions">
-                        <button class="add-data-btn">+ Add Weight Data</button>
+                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Weight Data</button>
                     </div>
                 </div>
 
@@ -111,7 +131,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each [...weightData].reverse() as entry}
+                        {#each [...metrics.weight].reverse() as entry}
                             <tr>
                                 <td>{entry.date}</td>
                                 <td>{entry.value} kg</td>
@@ -128,11 +148,11 @@
             <div class="metric-detail-panel">
                 <div class="metric-summary">
                     <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(stepsData).toLocaleString()}</span>
+                        <span class="metric-value">{getLatestValue(metrics.steps).toLocaleString()}</span>
                         <span class="metric-label">Daily Steps</span>
                     </div>
                     <div class="metric-actions">
-                        <button class="add-data-btn">+ Add Steps Data</button>
+                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Steps Data</button>
                     </div>
                 </div>
 
@@ -151,10 +171,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each [...stepsData].reverse() as entry}
+                        {#each [...metrics.steps].reverse() as entry}
                             <tr>
                                 <td>{entry.date}</td>
-                                <td>{entry.value.toLocaleString()}</td>
+                                <td>{entry.value}</td>
                             </tr>
                         {/each}
                         </tbody>
@@ -168,11 +188,11 @@
             <div class="metric-detail-panel">
                 <div class="metric-summary">
                     <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(sleepData, 'hours')} hrs</span>
+                        <span class="metric-value">{getLatestValue(metrics.sleep)} hrs</span>
                         <span class="metric-label">Last Night's Sleep</span>
                     </div>
                     <div class="metric-actions">
-                        <button class="add-data-btn">+ Add Sleep Data</button>
+                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Sleep Data</button>
                     </div>
                 </div>
 
@@ -192,11 +212,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each [...sleepData].reverse() as entry}
+                        {#each [...metrics.sleep].reverse() as entry}
                             <tr>
                                 <td>{entry.date}</td>
-                                <td>{entry.hours} hrs</td>
-                                <td>{entry.quality}</td>
+                                <td>{entry.value} hrs</td>
+                                <td></td>
                             </tr>
                         {/each}
                         </tbody>
@@ -210,11 +230,11 @@
             <div class="metric-detail-panel">
                 <div class="metric-summary">
                     <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(waterData)} L</span>
+                        <span class="metric-value">{getLatestValue(metrics.water)} L</span>
                         <span class="metric-label">Today's Water Intake</span>
                     </div>
                     <div class="metric-actions">
-                        <button class="add-data-btn">+ Add Water Data</button>
+                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Water Data</button>
                     </div>
                 </div>
 
@@ -233,7 +253,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {#each [...waterData].reverse() as entry}
+                        {#each [...metrics.water].reverse() as entry}
                             <tr>
                                 <td>{entry.date}</td>
                                 <td>{entry.value} L</td>
@@ -244,8 +264,55 @@
                 </div>
             </div>
         {/if}
+
+        <!-- Mood Metric -->
+        {#if activeMetric === 'mood'}
+            <div class="metric-detail-panel">
+                <div class="metric-summary">
+                    <div class="metric-current">
+                        <span class="metric-value">{getLatestValue(metrics.mood)}</span>
+                        <span class="metric-label">Current Mood</span>
+                    </div>
+                    <div class="metric-actions">
+                        <button class="add-data-btn" on:click={() => modeNewData = 2}>+ Select Your Current Mood</button>
+                    </div>
+                </div>
+
+                <div class="metric-chart-container">
+                    <h3>Mood Tracking</h3>
+                    <div class="placeholder-chart"></div>
+                </div>
+
+                <div class="metric-history">
+                    <h3>Recent Records</h3>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mood</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {#each [...metrics.mood].reverse() as entry}
+                            <tr>
+                                <td>{entry.date}</td>
+                                <td>{entry.value}</td>
+                            </tr>
+                        {/each}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {/if}
     </div>
 </div>
+
+<NewData
+    metric={activeMetric}
+    mode={modeNewData}
+    on:submit={handleNewData}
+    on:close = {() => modeNewData = 0}
+/>
 
 <style lang="scss">
   /* Custom Color Palette */

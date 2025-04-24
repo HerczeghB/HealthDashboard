@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import path from 'path';
 
 const FILE_PATH = 'src/data/dashboard-preferences.json';
 const DEFAULT_PREFERENCES = {

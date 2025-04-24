@@ -16,6 +16,9 @@
         <li class={currentPath === '/profile' ? 'nav-item active' : 'nav-item'}>
             <a href="/profile">Profile</a>
         </li>
+        <li class={currentPath === '/calendar' ? 'nav-item active' : 'nav-item'}>
+            <a href="/calendar">Calendar</a>
+        </li>
     </ul>
 </nav>
 

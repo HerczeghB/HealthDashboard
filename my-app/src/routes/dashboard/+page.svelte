@@ -16,15 +16,35 @@
         showMood: true,
         showEvents: true,
     }
+    let currentMetrics = {
+        weight: [],
+        steps: [],
+        water: [],
+        sleep: [],
+        mood: []
+    };
+
+
+    const getLatestValue = (metric) => {
+        if (metric && metric.length > 0) {
+            return metric[metric.length - 1].value;
+        }
+        return 'N/A';
+    };
 
     onMount(async () => {
         const res = await fetch("/api/dashboard-preference");
         if (res.ok){
             dashboardPreferences = await res.json();
         }
+        const res2 = await fetch("/api/new-data");
+        if (res2.ok){
+            currentMetrics = await res2.json();
+        }
     })
 
     const today = new Date().toDateString();
+
 
 </script>
 
@@ -34,20 +54,21 @@
 </div>
 
 <div class="dashboard-grid">
+
     {#if dashboardPreferences.showWeight}
-        <HealthCard title="Weight Tracking" value="70.5" unit="kg" icon="⚖️" />
+        <HealthCard title="Weight Tracking" value={getLatestValue(currentMetrics.weight)} unit="kg" icon="⚖️" />
     {/if}
 
     {#if dashboardPreferences.showSteps}
-        <HealthCard title="Step Count" value="8,745" unit="steps" icon="👣" />
+        <HealthCard title="Step Count" value={getLatestValue(currentMetrics.steps)} unit="steps" icon="👣" />
     {/if}
 
     {#if dashboardPreferences.showSleep}
-        <HealthCard title="Sleep Quality" value="7.5" unit="hours" icon="😴" />
+        <HealthCard title="Sleep Quality" value={getLatestValue(currentMetrics.sleep)} unit="hours" icon="😴" />
     {/if}
 
     {#if dashboardPreferences.showWater}
-        <WaterCard currentIntake={1.5}/>
+        <WaterCard currentIntake={getLatestValue(currentMetrics.water)}/>
     {/if}
 
     {#if dashboardPreferences.showActivity}
@@ -63,7 +84,7 @@
     {/if}
 
     {#if dashboardPreferences.showMood}
-        <HealthCard title="Mood Tracker" value="Good" icon="😊" />
+        <HealthCard title="Mood Tracker" value={getLatestValue(currentMetrics.mood)} icon="😀😐😕" />
     {/if}
 
     {#if dashboardPreferences.showEvents}
