@@ -1,7 +1,7 @@
 <script>
     export let icon = "💧";
-    export let currentIntake = 1;
-    const goal = 2;
+    export let currentIntake;
+    export let goal;
     $: progressPercent = Math.min((currentIntake / goal) * 100, 100);
 </script>
 <div class="water-card">

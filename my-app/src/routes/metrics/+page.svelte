@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import NewData from "$lib/components/NewData.svelte";
+    import MetricPanel from "$lib/components/MetricPanel.svelte";
 
     let activeMetric = 'weight';
     let modeNewData = 0; //0 - hidden, 1 - number value, 2 - string value(mood)
@@ -11,6 +12,71 @@
         water: [],
         sleep: [],
         mood: []
+    };
+
+    // Column definitions for each metric
+    const metricColumns = {
+        weight: [
+            { key: 'date', title: 'Date' },
+            { key: 'value', title: 'Weight (kg)', format: (v) => `${v} kg` }
+        ],
+        steps: [
+            { key: 'date', title: 'Date' },
+            { key: 'value', title: 'Steps' }
+        ],
+        sleep: [
+            { key: 'date', title: 'Date' },
+            { key: 'value', title: 'Hours', format: (v) => `${v} hrs` },
+            { key: 'quality', title: 'Quality' }
+        ],
+        water: [
+            { key: 'date', title: 'Date' },
+            { key: 'value', title: 'Amount (L)', format: (v) => `${v} L` }
+        ],
+        mood: [
+            { key: 'date', title: 'Date' },
+            { key: 'value', title: 'Mood' }
+        ]
+    };
+
+    // Metric display configuration
+    const metricConfig = {
+        weight: {
+            title: 'Weight',
+            valueLabel: 'Current Weight',
+            unit: 'kg',
+            chartTitle: 'Weight Tracking',
+            addButtonText: '+ Add Weight Data'
+        },
+        steps: {
+            title: 'Steps',
+            valueLabel: 'Daily Steps',
+            unit: '',
+            chartTitle: 'Steps History',
+            addButtonText: '+ Add Steps Data'
+        },
+        sleep: {
+            title: 'Sleep',
+            valueLabel: 'Last Night\'s Sleep',
+            unit: 'hrs',
+            chartTitle: 'Sleep Patterns',
+            addButtonText: '+ Add Sleep Data'
+        },
+        water: {
+            title: 'Water',
+            valueLabel: 'Today\'s Water Intake',
+            unit: 'L',
+            chartTitle: 'Water Consumption',
+            addButtonText: '+ Add Water Data'
+        },
+        mood: {
+            title: 'Mood',
+            valueLabel: 'Current Mood',
+            unit: '',
+            chartTitle: 'Mood Tracking',
+            addDataMode: 2,
+            addButtonText: '+ Select Your Current Mood'
+        }
     };
 
     onMount(async () => {
@@ -35,6 +101,10 @@
         return 'N/A';
     }
 
+    function handleAddDataRequest(mode) {
+        modeNewData = mode;
+    }
+
     async function handleNewData(event) {
         const { metric, data } = event.detail;
 
@@ -56,6 +126,7 @@
 
         if (res.ok) {
             console.log('Data submitted successfully:', result);
+            metrics[metric] = [...metrics[metric], data];
         } else {
             console.error('Error submitting data:', result);
         }
@@ -103,215 +174,29 @@
     </div>
 
     <div class="metrics-content">
-        <!-- Weight Metric -->
-        {#if activeMetric === 'weight'}
-            <div class="metric-detail-panel">
-                <div class="metric-summary">
-                    <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(metrics.weight)} kg</span>
-                        <span class="metric-label">Current Weight</span>
-                    </div>
-                    <div class="metric-actions">
-                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Weight Data</button>
-                    </div>
-                </div>
-
-                <div class="metric-chart-container">
-                    <h3>Weight Tracking</h3>
-                    <div class="placeholder-chart"></div>
-                </div>
-
-                <div class="metric-history">
-                    <h3>Recent Records</h3>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Weight (kg)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each [...metrics.weight].reverse() as entry}
-                            <tr>
-                                <td>{entry.date}</td>
-                                <td>{entry.value} kg</td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {/if}
-
-        <!-- Steps Metric -->
-        {#if activeMetric === 'steps'}
-            <div class="metric-detail-panel">
-                <div class="metric-summary">
-                    <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(metrics.steps).toLocaleString()}</span>
-                        <span class="metric-label">Daily Steps</span>
-                    </div>
-                    <div class="metric-actions">
-                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Steps Data</button>
-                    </div>
-                </div>
-
-                <div class="metric-chart-container">
-                    <h3>Steps History</h3>
-                    <div class="placeholder-chart"></div>
-                </div>
-
-                <div class="metric-history">
-                    <h3>Recent Records</h3>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Steps</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each [...metrics.steps].reverse() as entry}
-                            <tr>
-                                <td>{entry.date}</td>
-                                <td>{entry.value}</td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {/if}
-
-        <!-- Sleep Metric -->
-        {#if activeMetric === 'sleep'}
-            <div class="metric-detail-panel">
-                <div class="metric-summary">
-                    <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(metrics.sleep)} hrs</span>
-                        <span class="metric-label">Last Night's Sleep</span>
-                    </div>
-                    <div class="metric-actions">
-                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Sleep Data</button>
-                    </div>
-                </div>
-
-                <div class="metric-chart-container">
-                    <h3>Sleep Patterns</h3>
-                    <div class="placeholder-chart"></div>
-                </div>
-
-                <div class="metric-history">
-                    <h3>Recent Records</h3>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Hours</th>
-                            <th>Quality</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each [...metrics.sleep].reverse() as entry}
-                            <tr>
-                                <td>{entry.date}</td>
-                                <td>{entry.value} hrs</td>
-                                <td></td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {/if}
-
-        <!-- Water Metric -->
-        {#if activeMetric === 'water'}
-            <div class="metric-detail-panel">
-                <div class="metric-summary">
-                    <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(metrics.water)} L</span>
-                        <span class="metric-label">Today's Water Intake</span>
-                    </div>
-                    <div class="metric-actions">
-                        <button class="add-data-btn" on:click={() => modeNewData = 1}>+ Add Water Data</button>
-                    </div>
-                </div>
-
-                <div class="metric-chart-container">
-                    <h3>Water Consumption</h3>
-                    <div class="placeholder-chart"></div>
-                </div>
-
-                <div class="metric-history">
-                    <h3>Recent Records</h3>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount (L)</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each [...metrics.water].reverse() as entry}
-                            <tr>
-                                <td>{entry.date}</td>
-                                <td>{entry.value} L</td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        {/if}
-
-        <!-- Mood Metric -->
-        {#if activeMetric === 'mood'}
-            <div class="metric-detail-panel">
-                <div class="metric-summary">
-                    <div class="metric-current">
-                        <span class="metric-value">{getLatestValue(metrics.mood)}</span>
-                        <span class="metric-label">Current Mood</span>
-                    </div>
-                    <div class="metric-actions">
-                        <button class="add-data-btn" on:click={() => modeNewData = 2}>+ Select Your Current Mood</button>
-                    </div>
-                </div>
-
-                <div class="metric-chart-container">
-                    <h3>Mood Tracking</h3>
-                    <div class="placeholder-chart"></div>
-                </div>
-
-                <div class="metric-history">
-                    <h3>Recent Records</h3>
-                    <table class="data-table">
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Mood</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {#each [...metrics.mood].reverse() as entry}
-                            <tr>
-                                <td>{entry.date}</td>
-                                <td>{entry.value}</td>
-                            </tr>
-                        {/each}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        {#if metrics[activeMetric]}
+            <MetricPanel
+                    metric={activeMetric}
+                    metricData={metrics[activeMetric]}
+                    title={metricConfig[activeMetric].title}
+                    latestValue={getLatestValue(metrics[activeMetric])}
+                    unit={metricConfig[activeMetric].unit}
+                    valueLabel={metricConfig[activeMetric].valueLabel}
+                    chartTitle={metricConfig[activeMetric].chartTitle}
+                    tableColumns={metricColumns[activeMetric]}
+                    onAddData={handleAddDataRequest}
+                    addDataMode={metricConfig[activeMetric].addDataMode || 1}
+                    addButtonText={metricConfig[activeMetric].addButtonText}
+            />
         {/if}
     </div>
 </div>
 
 <NewData
-    metric={activeMetric}
-    mode={modeNewData}
-    on:submit={handleNewData}
-    on:close = {() => modeNewData = 0}
+        metric={activeMetric}
+        mode={modeNewData}
+        on:submit={handleNewData}
+        on:close = {() => modeNewData = 0}
 />
 
 <style lang="scss">
@@ -382,113 +267,5 @@
     border-radius: $border-radius;
     box-shadow: $shadow-sm;
     overflow: hidden;
-  }
-
-  .metric-detail-panel {
-    padding: 1.5rem;
-  }
-
-  .metric-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-
-    .metric-current {
-      display: flex;
-      flex-direction: column;
-
-      .metric-value {
-        font-size: 2.5rem;
-        font-weight: 600;
-        color: $primary-accent;
-      }
-
-      .metric-label {
-        font-size: 0.9rem;
-        color: $text-muted;
-      }
-    }
-
-    .metric-actions {
-      .add-data-btn {
-        padding: 0.7rem 1.2rem;
-        background-color: $primary-accent;
-        color: $light-accent;
-        border: none;
-        border-radius: $border-radius;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-
-        &:hover {
-          background-color: darken($primary-accent, 5%);
-        }
-      }
-    }
-  }
-
-  .metric-chart-container {
-    margin-bottom: 2rem;
-
-    h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-      color: $primary-dark;
-    }
-
-    .placeholder-chart {
-      height: 250px;
-      background: linear-gradient(135deg, rgba($primary-accent, 0.1) 0%, rgba($secondary-accent, 0.1) 100%);
-      border-radius: $border-radius;
-    }
-  }
-
-  .metric-history {
-    h3 {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-      color: $primary-dark;
-    }
-  }
-
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #E5E7EB;
-    }
-
-    th {
-      font-weight: 600;
-      color: $primary-dark;
-      background-color: #F9FAFB;
-    }
-
-    td {
-      color: $text-on-light;
-    }
-
-    tbody tr:hover {
-      background-color: #F9FAFB;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .metric-summary {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .data-table {
-      display: block;
-      overflow-x: auto;
-    }
   }
 </style>

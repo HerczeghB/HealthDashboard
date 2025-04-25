@@ -16,7 +16,13 @@
         showMood: true,
         showEvents: true,
     }
-    let healthGoals = {};
+    let healthGoals = {
+        height: 0,
+        targetWeight: 0,
+        dailyStepGoal: 0,
+        targetWaterIntake: 0,
+        sleepGoal: 0
+    };
     let currentMetrics = {
         weight: [],
         steps: [],
@@ -38,8 +44,7 @@
         if (res.ok){
             const userData = await res.json();
             dashboardPreferences = userData.dashboardPreferences || dashboardPreferences;
-            healthGoals = userData.healthGoals || [];
-            console.log(healthGoals);
+            healthGoals = userData.healthGoals || {};
         }
         const res2 = await fetch("/api/new-data");
         if (res2.ok){
@@ -72,7 +77,7 @@
     {/if}
 
     {#if dashboardPreferences.showWater}
-        <WaterCard currentIntake={getLatestValue(currentMetrics.water)}/>
+        <WaterCard currentIntake={getLatestValue(currentMetrics.water)} goal= {healthGoals.targetWaterIntake} />
     {/if}
 
     {#if dashboardPreferences.showActivity}

@@ -9,6 +9,7 @@
         height: 180,
         targetWeight: 68,
         dailyStepGoal: 10000,
+        targetWaterIntake: 3,
         sleepGoal: 8
     };
 
@@ -42,27 +43,6 @@
         activeSection = section;
     }
 
-    // Update profile function (placeholder)
-    function updateProfile() {
-        // In a real app, this would send the updated data to the backend
-        alert('Profile updated successfully');
-    }
-
-    // Update dashboard preferences function (placeholder)
-    async function updatePreferences() {
-        const res = await fetch("/api/dashboard-preference", {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(dashboardPreferences)
-        });
-
-        if (res.ok) {
-            alert('Preferences saved successfully');
-        }else{
-            alert('Failed to save preferences');
-        }
-    }
-
     async function saveAllUserData() {
         const payload = {
             userId: 'user123',
@@ -76,6 +56,7 @@
                 height: userProfile.height,
                 targetWeight: userProfile.targetWeight,
                 dailyStepGoal: userProfile.dailyStepGoal,
+                targetWaterIntake: userProfile.targetWaterIntake,
                 sleepGoal: userProfile.sleepGoal
             },
             dashboardPreferences
@@ -177,6 +158,11 @@
                 <div class="form-group">
                     <label for="stepGoal">Daily Step Goal</label>
                     <input type="number" id="stepGoal" bind:value={userProfile.dailyStepGoal} min="0" max="100000" step="500" />
+                </div>
+
+                <div class="form-group">
+                    <label for="targetWaterIntake">Target Water Intake</label>
+                    <input type="number" id="stepGoal" bind:value={userProfile.targetWaterIntake} min="0" max="5" step="0.5" />
                 </div>
 
                 <div class="form-group">
