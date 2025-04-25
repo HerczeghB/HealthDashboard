@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
+import path from 'path';
 import { json } from '@sveltejs/kit';
 
-const FILE_PATH = 'src/data/metrics.json';
+const FILE_PATH = path.resolve('src/data/metrics.json');
 const DEFAULT_METRICS = {
     weight: [],
     steps: [],

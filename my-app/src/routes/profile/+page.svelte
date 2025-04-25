@@ -1,7 +1,6 @@
 <script>
     import { onMount} from "svelte";
 
-    // User profile data (placeholder)
     let userProfile = {
         name: 'John Doe',
         email: 'john.doe@example.com',
@@ -25,12 +24,15 @@
     };
 
     onMount(async () => {
-        const res = await fetch("/api/dashboard-preference");
+        const res = await fetch("/api/user-data");
         if (res.ok) {
-            dashboardPreferences = await res.json();
+            const userData = await res.json();
+            userProfile = userData.profile;
+            dashboardPreferences = userData.dashboardPreferences;
+            // If needed, you can also extract healthGoals separately
+            userProfile = { ...userProfile, ...userData.healthGoals };
         }
-    })
-
+    });
 
     // Active section state
     let activeSection = 'personal';
@@ -58,6 +60,37 @@
             alert('Preferences saved successfully');
         }else{
             alert('Failed to save preferences');
+        }
+    }
+
+    async function saveAllUserData() {
+        const payload = {
+            userId: 'user123',
+            profile: {
+                name: userProfile.name,
+                email: userProfile.email,
+                birthdate: userProfile.birthdate,
+                gender: userProfile.gender
+            },
+            healthGoals: {
+                height: userProfile.height,
+                targetWeight: userProfile.targetWeight,
+                dailyStepGoal: userProfile.dailyStepGoal,
+                sleepGoal: userProfile.sleepGoal
+            },
+            dashboardPreferences
+        };
+
+        const res = await fetch("/api/user-data", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert('All data saved successfully');
+        } else {
+            alert('Failed to save data');
         }
     }
 </script>
@@ -121,7 +154,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button class="primary-button" on:click={updateProfile}>Save Changes</button>
+                    <button class="primary-button" on:click={saveAllUserData}>Save Changes</button>
                 </div>
             </div>
         {/if}
@@ -152,7 +185,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button class="primary-button" on:click={updateProfile}>Save Health Goals</button>
+                    <button class="primary-button" on:click={saveAllUserData}>Save Health Goals</button>
                 </div>
             </div>
         {/if}
@@ -222,7 +255,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button class="primary-button" on:click={updatePreferences}>Save Preferences</button>
+                    <button class="primary-button" on:click={saveAllUserData}>Save Preferences</button>
                 </div>
             </div>
         {/if}

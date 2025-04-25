@@ -16,6 +16,7 @@
         showMood: true,
         showEvents: true,
     }
+    let healthGoals = {};
     let currentMetrics = {
         weight: [],
         steps: [],
@@ -33,9 +34,12 @@
     };
 
     onMount(async () => {
-        const res = await fetch("/api/dashboard-preference");
+        const res = await fetch("/api/user-data");
         if (res.ok){
-            dashboardPreferences = await res.json();
+            const userData = await res.json();
+            dashboardPreferences = userData.dashboardPreferences || dashboardPreferences;
+            healthGoals = userData.healthGoals || [];
+            console.log(healthGoals);
         }
         const res2 = await fetch("/api/new-data");
         if (res2.ok){
