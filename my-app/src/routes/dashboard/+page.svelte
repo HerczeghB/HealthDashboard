@@ -5,6 +5,7 @@
     import WaterCard from "$lib/components/WaterCard.svelte";
     import EventsCard from "$lib/components/EventsCard.svelte";
     import { onMount } from "svelte";
+    import Chart from "$lib/components/Chart.svelte";
 
     let dashboardPreferences = {
         showWeight: true,
@@ -30,6 +31,10 @@
         sleep: [],
         mood: []
     };
+
+    $: unitSteps = getLatestValue(currentMetrics.steps) === 1 ? 'step' : 'steps';
+    $: unitSleep = getLatestValue(currentMetrics.sleep) === 1 ? 'hour' : 'hours';
+    $: unitWeight = 'kg';
 
 
     const getLatestValue = (metric) => {
@@ -65,40 +70,48 @@
 <div class="dashboard-grid">
 
     {#if dashboardPreferences.showWeight}
-        <HealthCard title="Weight Tracking" value={getLatestValue(currentMetrics.weight)} unit="kg" icon="⚖️" />
+        <HealthCard title="Weight Tracking" value={getLatestValue(currentMetrics.weight)} unit={unitWeight} icon="⚖️" goal={healthGoals.targetWeight} goalDirection="below" />
     {/if}
 
     {#if dashboardPreferences.showSteps}
-        <HealthCard title="Step Count" value={getLatestValue(currentMetrics.steps)} unit="steps" icon="👣" />
+        <HealthCard title="Step Count" value={getLatestValue(currentMetrics.steps)} unit={unitSteps} icon="👣" goal={healthGoals.dailyStepGoal} goalDirection="above"/>
     {/if}
 
     {#if dashboardPreferences.showSleep}
-        <HealthCard title="Sleep Quality" value={getLatestValue(currentMetrics.sleep)} unit="hours" icon="😴" />
+        <HealthCard title="Sleep Quality" value={getLatestValue(currentMetrics.sleep)} unit={unitSleep} icon="😴" goal={healthGoals.sleepGoal} goalDirection="above" />
+    {/if}
+
+    {#if dashboardPreferences.showMood}
+        <HealthCard title="Mood Tracker" value={getLatestValue(currentMetrics.mood)} icon="😀😐😕" goal="" goalDirection="" />
     {/if}
 
     {#if dashboardPreferences.showWater}
         <WaterCard currentIntake={getLatestValue(currentMetrics.water)} goal= {healthGoals.targetWaterIntake} />
     {/if}
 
+    {#if dashboardPreferences.showEvents}
+        <EventsCard />
+    {/if}
+
     {#if dashboardPreferences.showActivity}
         <div class="dashboard-card wide">
-            <ActivityHistory />
+            <Chart
+                    metric='steps'
+                    data={currentMetrics.steps}
+                    title="Activity History"
+            />
         </div>
     {/if}
 
+
+
     {#if dashboardPreferences.showNutrition}
-        <div class="dashboard-card tall">
+        <div class="dashboard-card wide">
             <NutritionTracker />
         </div>
     {/if}
 
-    {#if dashboardPreferences.showMood}
-        <HealthCard title="Mood Tracker" value={getLatestValue(currentMetrics.mood)} icon="😀😐😕" />
-    {/if}
 
-    {#if dashboardPreferences.showEvents}
-        <EventsCard />
-    {/if}
 </div>
 
 <style lang="scss">
@@ -156,14 +169,10 @@
     }
 
     &.wide {
-      grid-column: span 2;
+      grid-column: span 3;
       display: block;
     }
 
-    &.tall {
-      grid-row: span 2;
-      display: block;
-    }
   }
 
   /* Responsive adjustments */

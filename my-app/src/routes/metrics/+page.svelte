@@ -51,7 +51,7 @@
         steps: {
             title: 'Steps',
             valueLabel: 'Daily Steps',
-            unit: '',
+            unit: 'steps',
             chartTitle: 'Steps History',
             addButtonText: '+ Add Steps Data'
         },
@@ -78,6 +78,16 @@
             addButtonText: '+ Select Your Current Mood'
         }
     };
+
+    $: activeUnit = (() => {
+        const latestValue = getLatestValue(metrics[activeMetric]);
+        const baseUnit = metricConfig[activeMetric].unit;
+
+        if (activeMetric === 'steps') return latestValue === 1 ? 'step' : baseUnit;
+        if (activeMetric === 'sleep') return latestValue === 1 ? 'hr' : baseUnit;
+        return baseUnit;
+    })();
+
 
     onMount(async () => {
         try {
@@ -180,7 +190,7 @@
                     metricData={metrics[activeMetric]}
                     title={metricConfig[activeMetric].title}
                     latestValue={getLatestValue(metrics[activeMetric])}
-                    unit={metricConfig[activeMetric].unit}
+                    unit={activeUnit}
                     valueLabel={metricConfig[activeMetric].valueLabel}
                     chartTitle={metricConfig[activeMetric].chartTitle}
                     tableColumns={metricColumns[activeMetric]}

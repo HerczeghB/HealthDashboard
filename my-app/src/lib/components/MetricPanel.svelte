@@ -19,6 +19,12 @@
         }
         return value;
     }
+    function getSleepQuality(hours){
+        if (hours < 4) return {label: 'Poor', color: 'red'}
+        if (hours < 6) return {label: 'Okay', color: 'orange'}
+        if (hours < 8) return {label: 'Good', color: 'green'}
+        return {label: 'Excellent', color: 'blue'}
+    }
 </script>
 
 <div class="metric-detail-panel">
@@ -57,8 +63,10 @@
                                 {entry[column.key]}
                             {:else if column.key === 'value'}
                                 {formatValue(entry[column.key], column)}
+                            {:else if column.key === 'quality'}
+                                <span style="color: {getSleepQuality(entry.value).color}; font-weight: bold;">{getSleepQuality(entry.value).label}</span>
                             {:else}
-                                {entry[column.key] ?? ''}
+                                {entry[column.key] === ''}
                             {/if}
                         </td>
                     {/each}

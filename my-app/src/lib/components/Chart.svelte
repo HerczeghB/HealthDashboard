@@ -148,7 +148,7 @@
             };
 
             chartConfig = {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
@@ -180,10 +180,15 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    elements: {
+                        point: {
+                            radius: 6,
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 5,
+                            max: 5.5,
                             ticks: {
                                 stepSize: 1,
                                 callback: function(value) {

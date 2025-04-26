@@ -9,12 +9,15 @@
     <div class="info">
         <h3>Water Intake</h3>
         <p>{currentIntake} / {goal} liter</p>
-
+        {#if Number(currentIntake) >= Number(goal)}
+            <div class="completed">
+                Goal reached!
+            </div>
+        {/if}
         <div class="progress-container">
             <div class="progress-fill" style="height: {progressPercent}%;"></div>
         </div>
     </div>
-
 </div>
 
 <style lang="scss">
@@ -83,6 +86,13 @@
       width: 100%;
       background-color: $secondary-accent;
       transition: height 0.3s ease;
+    }
+
+    .completed {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: darkgreen;
     }
   }
 </style>

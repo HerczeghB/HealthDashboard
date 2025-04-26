@@ -74,6 +74,15 @@ export async function POST({ request }) {
             currentData[metric].push(data); // Add new entry
         }
 
+        type MetricEntry = {
+            date: string;
+            value: number | string;
+        };
+
+        currentData[metric].sort((a: MetricEntry, b: MetricEntry) => {
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+
         // Save updated data
         await fs.writeFile(FILE_PATH, JSON.stringify(currentData, null, 2));
 

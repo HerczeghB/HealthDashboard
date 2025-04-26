@@ -69,7 +69,6 @@
         <div class="content">
             <h3>Add new {metric} data</h3>
             {#if mode === 1}
-                <!-- Numeric input -->
                 <input
                         type="number"
                         bind:value={inputValue}

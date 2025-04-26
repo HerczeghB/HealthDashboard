@@ -2,7 +2,30 @@
     export let title = "Health Metric";
     export let value = "--";
     export let unit = "";
-    export let icon = "💪"; // Default icon (can be replaced)
+    export let icon = "💪";
+    export let goal;
+    export let goalDirection;
+
+    function formatUnit(number, unit) {
+        if (number === 1) {
+            if (unit === "step") return "steps";
+            if (unit === "hour") return "hours";
+        }
+        return unit;
+    }
+
+    function goalCompleted(value, goal, direction) {
+        const numericValue = Number(value);
+        const numericGoal = Number(goal);
+
+        if (isNaN(numericValue) || isNaN(numericGoal)) return false;
+
+        if (direction === 'below') {
+            return numericValue <= numericGoal;
+        } else {
+            return numericValue >= numericGoal;
+        }
+    }
 </script>
 
 <div class="health-card">
@@ -10,6 +33,17 @@
     <div class="info">
         <h3>{title}</h3>
         <p>{value} {unit}</p>
+        {#if goal}
+            {#if goalCompleted(value, goal, goalDirection)}
+                <div class="completed">
+                    Goal reached! ({goal})
+                </div>
+            {:else}
+                <div class="goal">
+                    Current goal : {goal} {formatUnit(value, unit)}
+                </div>
+            {/if}
+        {/if}
     </div>
 </div>
 
@@ -52,6 +86,18 @@
       font-size: 1.5rem;
       font-weight: 500;
       color: $secondary-accent;
+    }
+    .goal {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: darkred;
+    }
+    .completed {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: darkgreen;
     }
 
     .icon {
