@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount} from "svelte";
 
     let userProfile = {
@@ -30,8 +30,7 @@
             const userData = await res.json();
             userProfile = userData.profile;
             dashboardPreferences = userData.dashboardPreferences;
-            // If needed, you can also extract healthGoals separately
-            userProfile = { ...userProfile, ...userData.healthGoals };
+
         }
     });
 
@@ -111,12 +110,12 @@
                 <h3>Personal Information</h3>
                 <div class="form-group">
                     <label for="name">Full Name</label>
-                    <input type="text" id="name" bind:value={userProfile.name} />
+                    <input type="text" id="name" bind:value={userProfile.name} placeholder="Full Name" />
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" bind:value={userProfile.email} />
+                    <input type="email" id="email" bind:value={userProfile.email} placeholder="Email Address" />
                 </div>
 
                 <div class="form-group">
@@ -162,7 +161,7 @@
 
                 <div class="form-group">
                     <label for="targetWaterIntake">Target Water Intake</label>
-                    <input type="number" id="stepGoal" bind:value={userProfile.targetWaterIntake} min="0" max="5" step="0.5" />
+                    <input type="number" id="targetWaterIntake" bind:value={userProfile.targetWaterIntake} min="0" max="5" step="0.5" />
                 </div>
 
                 <div class="form-group">

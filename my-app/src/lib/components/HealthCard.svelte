@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     export let title = "Health Metric";
     export let value = "--";
     export let unit = "";

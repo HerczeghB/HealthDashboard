@@ -1,6 +1,5 @@
-<script>
+<script lang="ts">
     import HealthCard from "$lib/components/HealthCard.svelte";
-    import ActivityHistory from "$lib/components/ActivityHistory.svelte";
     import NutritionTracker from "$lib/components/NutritionTracker.svelte";
     import WaterCard from "$lib/components/WaterCard.svelte";
     import EventsCard from "$lib/components/EventsCard.svelte";
@@ -58,12 +57,13 @@
     })
 
     const today = new Date().toDateString();
+    let activityMetric = "steps";
 
 
 </script>
 
 <div class="welcome-bar">
-    <h2>Welcome to Your Health Dashboard</h2>
+    <h2>Your Health Dashboard</h2>
     <p>Today: {today}</p>
 </div>
 
@@ -94,10 +94,18 @@
     {/if}
 
     {#if dashboardPreferences.showActivity}
+
         <div class="dashboard-card wide">
+            <div class="metric-buttons">
+                <button on:click={() => activityMetric = 'steps'}>Steps</button>
+                <button on:click={() => activityMetric = 'weight'}>Weight</button>
+                <button on:click={() => activityMetric = 'sleep'}>Sleep</button>
+                <button on:click={() => activityMetric = 'mood'}>Mood</button>
+                <button on:click={() => activityMetric = 'water'}>Water</button>
+            </div>
             <Chart
-                    metric='steps'
-                    data={currentMetrics.steps}
+                    metric={activityMetric}
+                    data={currentMetrics[activityMetric] || []}
                     title="Activity History"
             />
         </div>
@@ -173,6 +181,25 @@
       display: block;
     }
 
+  }
+  .metric-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    button {
+      background-color: $primary-accent;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: darken($primary-accent, 10%);
+      }
+    }
   }
 
   /* Responsive adjustments */

@@ -2,7 +2,6 @@
 node_modules/
 pnpm-lock.yaml
 yarn.lock
-package-lock.json
 
 # Build & output directories
 .svelte-kit/
@@ -13,7 +12,6 @@ dist/
 # Vite caches
 .vite/
 .vitepress/dist/
-vite.config.ts
 
 # Logs & Debugging
 npm-debug.log*

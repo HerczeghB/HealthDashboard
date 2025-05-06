@@ -1,30 +1,62 @@
-<script>
+<script lang="ts">
     import { fly } from 'svelte/transition';
-    import { tweened } from 'svelte/motion';
     import { quintOut } from 'svelte/easing';
 
+    // Current date tracking
+    let today = new Date();
     let currentDate = new Date();
-    let displayDate = new Date(currentDate); // For smooth month name transition
+    let displayDate = new Date(currentDate);
     let calendarDays = [];
     let direction = 'left';
     let showCalendar = true;
 
+    // Initialize the calendar on component mount
     const updateCalendar = () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
+
+        // Get first day and last day of the month
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
         const firstDayIndex = firstDay.getDay();
         const lastDayDate = lastDay.getDate();
 
+        // Calculate days from previous month to show
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+
         calendarDays = [];
 
-        for (let i = 0; i < firstDayIndex; i++) {
-            calendarDays.push(null);
+        // Add days from previous month
+        for (let i = firstDayIndex - 1; i >= 0; i--) {
+            calendarDays.push({
+                day: prevMonthLastDay - i,
+                currentMonth: false,
+                isPast: true
+            });
         }
+
+        // Add days of current month
         for (let i = 1; i <= lastDayDate; i++) {
-            calendarDays.push(i);
+            const date = new Date(year, month, i);
+            calendarDays.push({
+                day: i,
+                currentMonth: true,
+                isToday: date.toDateString() === today.toDateString(),
+                date: date
+            });
+        }
+
+        // Add days from next month to fill grid
+        // Show either 5 or 6 weeks depending on the month layout
+        const gridSize = calendarDays.length > 35 ? 42 : 35;
+        const remainingDays = gridSize - calendarDays.length;
+        for (let i = 1; i <= remainingDays; i++) {
+            calendarDays.push({
+                day: i,
+                currentMonth: false,
+                isPast: false
+            });
         }
     };
 
@@ -33,7 +65,8 @@
         showCalendar = false;
         setTimeout(() => {
             currentDate.setMonth(currentDate.getMonth() - 1);
-            displayDate = new Date(currentDate); // update label
+            currentDate = new Date(currentDate); // Create new date object to trigger reactivity
+            displayDate = new Date(currentDate);
             updateCalendar();
             showCalendar = true;
         }, 200);
@@ -44,19 +77,39 @@
         showCalendar = false;
         setTimeout(() => {
             currentDate.setMonth(currentDate.getMonth() + 1);
-            displayDate = new Date(currentDate); // update label
+            currentDate = new Date(currentDate); // Create new date object to trigger reactivity
+            displayDate = new Date(currentDate);
             updateCalendar();
             showCalendar = true;
         }, 200);
     };
 
-    $: updateCalendar();
+    // Go to current month
+    const goToToday = () => {
+        direction = currentDate < today ? 'left' : 'right';
+        showCalendar = false;
+        setTimeout(() => {
+            currentDate = new Date();
+            displayDate = new Date(currentDate);
+            updateCalendar();
+            showCalendar = true;
+        }, 200);
+    };
+
+    // Initialize calendar
+    $: {
+        // This will run whenever currentDate changes
+        updateCalendar();
+    }
 </script>
 
 <div class="calendar-container">
     <div class="calendar-header">
         <button class="nav-button" on:click={prevMonth}>‹</button>
-        <h2>{displayDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+        <div class="header-content">
+            <h2>{displayDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</h2>
+            <button class="today-button" on:click={goToToday}>Today</button>
+        </div>
         <button class="nav-button" on:click={nextMonth}>›</button>
     </div>
 
@@ -68,12 +121,10 @@
 
     <div class="calendar-animation-container">
         {#if showCalendar}
-            <div class="calendar-grid" transition:fly={{ x: direction === 'left' ? 300 : -300, duration: 250 }}>
-                {#each calendarDays as day}
-                    <div class="calendar-day">
-                        {#if day}
-                            <div class="day-number">{day}</div>
-                        {/if}
+            <div class="calendar-grid" in:fly={{ x: direction === 'left' ? 300 : -300, duration: 250, easing: quintOut }}>
+                {#each calendarDays as { day, currentMonth, isToday }}
+                    <div class="calendar-day" class:current-month={currentMonth} class:today={isToday}>
+                        <div class="day-number">{day}</div>
                     </div>
                 {/each}
             </div>
@@ -90,20 +141,23 @@
   $shadow-sm: 0 4px 6px rgba(3, 0, 39, 0.05);
   $shadow-md: 0 8px 15px rgba(3, 0, 39, 0.1);
   $transition-speed: 0.2s;
+  $today-highlight: #1D7874;
 
   .calendar-container {
     position: relative;
-    overflow: hidden; /* Containing the animation */
+    overflow: visible; /* Changed from hidden to prevent cutoff */
     background-color: transparent;
     padding: 1rem;
     border-radius: $border-radius;
+    max-width: 800px;
+    margin: 0 auto;
   }
 
   .calendar-animation-container {
     position: relative;
     width: 100%;
-    overflow: hidden; /* Additional overflow control */
-    min-height: 350px; /* Ensure consistent height during animation */
+    overflow: visible; /* Changed from hidden to allow content to show fully */
+    height: auto; /* Dynamic height based on content */
   }
 
   .calendar-header {
@@ -114,11 +168,18 @@
     z-index: 2;
     position: relative;
 
+    .header-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     h2 {
       color: $primary-dark;
       font-size: 1.5rem;
       font-weight: 600;
-      transition: opacity 0.3s ease;
+      margin: 0;
     }
 
     .nav-button {
@@ -133,6 +194,21 @@
 
       &:hover {
         background: darken($primary-accent, 10%);
+      }
+    }
+
+    .today-button {
+      background: transparent;
+      color: $primary-accent;
+      border: 1px solid $primary-accent;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba($primary-accent, 0.1);
       }
     }
   }
@@ -150,26 +226,47 @@
     color: $text-muted;
     font-weight: 600;
     font-size: 0.9rem;
+    padding: 0.5rem 0;
   }
 
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1rem;
-    position: absolute;
+    gap: 0.5rem;
+    position: relative; /* Changed from absolute to prevent cutoff */
     width: 100%;
     z-index: 1;
   }
 
   .calendar-day {
-    background-color: $card-bg-color;
+    background-color: rgba($card-bg-color, 0.6);
     border-radius: $border-radius;
     box-shadow: $shadow-sm;
-    height: 80px;
+    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all $transition-speed ease;
+    position: relative;
+
+    &.current-month {
+      background-color: $card-bg-color;
+    }
+
+    &:not(.current-month) {
+      .day-number {
+        opacity: 0.3;
+      }
+    }
+
+    &.today {
+      border: 2px solid $today-highlight;
+
+      .day-number {
+        color: $today-highlight;
+        font-weight: 700;
+      }
+    }
 
     .day-number {
       font-size: 1.1rem;
@@ -180,20 +277,26 @@
     &:hover {
       box-shadow: $shadow-md;
       transform: scale(1.03);
+      z-index: 5;
     }
   }
 
   @media (max-width: 768px) {
+    .calendar-animation-container {
+      min-height: 300px;
+    }
+
     .calendar-grid {
-      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
     }
 
     .calendar-day {
-      height: 60px;
-    }
+      aspect-ratio: auto; /* Remove fixed aspect ratio on mobile */
+      height: 40px;
 
-    .calendar-animation-container {
-      min-height: 250px;
+      .day-number {
+        font-size: 0.9rem;
+      }
     }
   }
 </style>

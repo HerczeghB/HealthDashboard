@@ -1,7 +1,7 @@
-<script>
-    export let icon = "💧";
-    export let currentIntake;
-    export let goal;
+<script lang="ts">
+    export let icon: string = "💧";
+    export let currentIntake: number;
+    export let goal: number;
     $: progressPercent = Math.min((currentIntake / goal) * 100, 100);
 </script>
 <div class="water-card">

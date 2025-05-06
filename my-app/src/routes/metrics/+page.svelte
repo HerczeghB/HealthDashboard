@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import NewData from "$lib/components/NewData.svelte";
     import MetricPanel from "$lib/components/MetricPanel.svelte";
@@ -13,6 +13,13 @@
         sleep: [],
         mood: []
     };
+
+    let averages = {
+        weight: null,
+        steps: null,
+        sleep: null,
+        water: null
+    }
 
     // Column definitions for each metric
     const metricColumns = {
@@ -42,35 +49,30 @@
     // Metric display configuration
     const metricConfig = {
         weight: {
-            title: 'Weight',
             valueLabel: 'Current Weight',
             unit: 'kg',
             chartTitle: 'Weight Tracking',
             addButtonText: '+ Add Weight Data'
         },
         steps: {
-            title: 'Steps',
             valueLabel: 'Daily Steps',
             unit: 'steps',
             chartTitle: 'Steps History',
             addButtonText: '+ Add Steps Data'
         },
         sleep: {
-            title: 'Sleep',
             valueLabel: 'Last Night\'s Sleep',
             unit: 'hrs',
             chartTitle: 'Sleep Patterns',
             addButtonText: '+ Add Sleep Data'
         },
         water: {
-            title: 'Water',
             valueLabel: 'Today\'s Water Intake',
             unit: 'L',
             chartTitle: 'Water Consumption',
             addButtonText: '+ Add Water Data'
         },
         mood: {
-            title: 'Mood',
             valueLabel: 'Current Mood',
             unit: '',
             chartTitle: 'Mood Tracking',
@@ -95,8 +97,13 @@
             if (res.ok) {
                 metrics = await res.json();
             }
+
+            const res2 = await fetch('/api/average');
+            if (res2.ok) {
+                averages = await res2.json();
+            }
         } catch (err) {
-            console.error('Failed to fetch metrics:', err);
+            console.error('Failed to fetch metrics or averages:', err);
         }
     });
 
@@ -188,7 +195,6 @@
             <MetricPanel
                     metric={activeMetric}
                     metricData={metrics[activeMetric]}
-                    title={metricConfig[activeMetric].title}
                     latestValue={getLatestValue(metrics[activeMetric])}
                     unit={activeUnit}
                     valueLabel={metricConfig[activeMetric].valueLabel}
@@ -197,6 +203,7 @@
                     onAddData={handleAddDataRequest}
                     addDataMode={metricConfig[activeMetric].addDataMode || 1}
                     addButtonText={metricConfig[activeMetric].addButtonText}
+                    average={averages[activeMetric] ?? null}
             />
         {/if}
     </div>

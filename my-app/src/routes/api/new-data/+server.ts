@@ -2,7 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { json } from '@sveltejs/kit';
 
-const FILE_PATH = path.resolve('src/data/metrics.json');
+const DATA_DIR = path.resolve('src/data');
+const FILE_PATH = path.join(DATA_DIR, 'metrics.json');
 const DEFAULT_METRICS = {
     weight: [],
     steps: [],
@@ -15,9 +16,11 @@ const ALLOWED_MOODS = ['happy', 'neutral', 'sad', 'anxious', 'excited'];
 export async function GET() {
     try {
         await fs.access(FILE_PATH);
+        await fs.mkdir(DATA_DIR, { recursive: true });
         const data = await fs.readFile(FILE_PATH, 'utf8');
         return json(JSON.parse(data));
     } catch (err) {
+        await fs.mkdir(DATA_DIR, { recursive: true });
         await fs.writeFile(FILE_PATH, JSON.stringify(DEFAULT_METRICS, null, 2));
         return json(DEFAULT_METRICS, { status: 200 });
     }
@@ -55,6 +58,7 @@ export async function POST({ request }) {
         // Read existing data from file
         let currentData;
         try {
+            await fs.mkdir(DATA_DIR, { recursive: true });
             const raw = await fs.readFile(FILE_PATH, 'utf8');
             currentData = JSON.parse(raw);
         } catch {
@@ -84,6 +88,7 @@ export async function POST({ request }) {
         });
 
         // Save updated data
+        await fs.mkdir(DATA_DIR, { recursive: true });
         await fs.writeFile(FILE_PATH, JSON.stringify(currentData, null, 2));
 
         return json({ success: true });
@@ -92,4 +97,3 @@ export async function POST({ request }) {
         return json({ error: 'Internal server error' }, { status: 500 });
     }
 }
-

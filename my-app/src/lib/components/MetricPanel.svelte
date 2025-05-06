@@ -1,9 +1,8 @@
-<script>
+<script lang="ts">
     import Chart from '$lib/components/Chart.svelte';
 
     export let metric = '';
     export let metricData = [];
-    export let title = '';
     export let latestValue = 'N/A';
     export let unit = '';
     export let valueLabel = '';
@@ -12,6 +11,7 @@
     export let onAddData = () => {};
     export let addDataMode = 1; // 1 for number, 2 for string (like mood)
     export let addButtonText = '+ Add Data';
+    export let average = null;
 
     function formatValue(value, col) {
         if (col.format) {
@@ -29,9 +29,18 @@
 
 <div class="metric-detail-panel">
     <div class="metric-summary">
-        <div class="metric-current">
-            <span class="metric-value">{latestValue} {unit}</span>
-            <span class="metric-label">{valueLabel}</span>
+        <div class="metric-current-container">
+            <div class="metric-current">
+                <span class="metric-value">{latestValue} {unit}</span>
+                <span class="metric-label">{valueLabel}</span>
+            </div>
+
+            {#if average !== null}
+                <div class="metric-average">
+                    <span class="metric-value">{average} {unit}</span>
+                    <span class="metric-label">Average</span>
+                </div>
+            {/if}
         </div>
         <div class="metric-actions">
             <button class="add-data-btn" on:click={() => onAddData(addDataMode)}>{addButtonText}</button>
@@ -95,19 +104,30 @@
     align-items: center;
     margin-bottom: 2rem;
 
-    .metric-current {
+    .metric-current-container {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .metric-current, .metric-average {
       display: flex;
       flex-direction: column;
 
       .metric-value {
-        font-size: 2.5rem;
-        font-weight: 600;
+        font-size: 1.6rem;
+        font-weight: 500;
         color: $primary-accent;
       }
 
       .metric-label {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: $text-muted;
+      }
+    }
+
+    .metric-average {
+      .metric-value {
+        color: $text-on-light;
       }
     }
 
@@ -167,6 +187,11 @@
     .metric-summary {
       flex-direction: column;
       align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .metric-current-container {
+      flex-direction: column;
       gap: 1rem;
     }
 

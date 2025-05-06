@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount, afterUpdate, onDestroy } from 'svelte';
     import Chart from 'chart.js/auto';
 
